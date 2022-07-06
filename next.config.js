@@ -6,6 +6,7 @@ const nextConfig = {
       'www.jennexplores.com',
       'upload.wikimedia.org',
       'lh3.googleusercontent.com',
+      'i.pravatar.cc',
     ],
   },
 };
