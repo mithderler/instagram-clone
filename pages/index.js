@@ -1,5 +1,5 @@
 import Head from 'next/head';
-import Image from 'next/image';
+import Header from '../components/Header';
 
 export default function Home() {
   return (
@@ -10,7 +10,8 @@ export default function Home() {
         <link rel='icon' href='/favicon.ico' />
       </Head>
       {/* Header */}
-      <p className='text-green-500 bg-red-600'>naber</p>
+      <Header />
+
       {/* Feed */}
 
       {/* Modal */}
