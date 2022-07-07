@@ -7,7 +7,7 @@ function signin({ providers }) {
       <Header />
       <div className='flex justify-center space-x-7 mt-20'>
         <img
-          className='hidden md:inline-flex md:w-48 object-cover rotate-6'
+          className='hidden md:inline-flex md:w-80 object-cover rotate-6'
           src='https://axistasarim.com/wp-content/uploads/2020/10/axisinstagram-600x546.png'
           alt='instagram-image'
         />
