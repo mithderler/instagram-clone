@@ -6,15 +6,19 @@ import {
   BookmarkIcon,
   EmojiHappyIcon,
 } from '@heroicons/react/outline';
+import { HeartIcon as HeartIconFilled } from '@heroicons/react/solid';
 import { useSession } from 'next-auth/react';
 import Moment from 'react-moment';
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
 } from 'firebase/firestore';
 import { db } from '../firebase';
 
@@ -22,6 +26,8 @@ function Post({ id, img, userImg, caption, username }) {
   const { data: session } = useSession();
   const [userComment, setUserComment] = useState('');
   const [comments, setComments] = useState([]);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [likes, setLikes] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
@@ -41,7 +47,41 @@ function Post({ id, img, userImg, caption, username }) {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [id]);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, 'posts', id, 'likes'),
+      (snapshot) => {
+        const fetchedLikes = snapshot.docs.map((doc) => ({
+          ...doc.data(),
+          id: doc.id,
+        }));
+        setLikes(fetchedLikes);
+      }
+    );
+    return () => {
+      unsubscribe();
+    };
+  }, [id]);
+
+  useEffect(() => {
+    setHasLiked(likes.some((like) => like.id === session?.user.uid));
+  }, [likes, session?.user.uid]);
+
+  async function likePost() {
+    try {
+      if (hasLiked) {
+        await deleteDoc(doc(db, 'posts', id, 'likes', session.user.uid));
+      } else {
+        await setDoc(doc(db, 'posts', id, 'likes', session.user.uid), {
+          username: session?.user.username,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async function sendComment(e) {
     e.preventDefault();
@@ -77,7 +117,14 @@ function Post({ id, img, userImg, caption, username }) {
       {session && (
         <div className='flex justify-between px-4 pt-4'>
           <div className='flex items-center space-x-4'>
-            <HeartIcon className='btn' />
+            {hasLiked ? (
+              <HeartIconFilled
+                onClick={likePost}
+                className='btn text-red-400'
+              />
+            ) : (
+              <HeartIcon onClick={likePost} className='btn' />
+            )}
             <ChatIcon className='btn' />
           </div>
           <BookmarkIcon className='btn' />
@@ -96,9 +143,9 @@ function Post({ id, img, userImg, caption, username }) {
               key={comment.id}
             >
               <img
-                src={comment.userImage}
+                src={comment?.userImage}
                 className='h-7 rounded-full object-cover'
-                alt='user-image'
+                alt='user-photo'
                 referrerPolicy='no-referrer'
               />
               <p className='font-semibold'>{comment.username}</p>
